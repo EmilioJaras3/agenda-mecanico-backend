@@ -58,3 +58,35 @@ model Cita {
   fecha_solicitud      DateTime          @default(now())
   ocupaciones          OcupacionDiaria[]
 }
+
+model OcupacionDiaria {
+  id          Int      @id @default(autoincrement())
+  cita_id     Int
+  cita        Cita     @relation(fields: [cita_id], references: [id], onDelete: Cascade)
+  fecha       DateTime
+  ocupa_cupo  Boolean
+  hora_inicio String?  // Formato "HH:mm"
+  hora_fin    String?  // Formato "HH:mm"
+
+  @@index([fecha])
+}
+
+model ConfiguracionTaller {
+  id                Int      @id @default(1)
+  capacidad_diaria  Int      @default(5)
+  hora_apertura     String   @default("08:00")
+  hora_cierre       String   @default("18:00")
+  lunes_trabaja     Boolean  @default(true)
+  martes_trabaja    Boolean  @default(true)
+  miercoles_trabaja Boolean  @default(true)
+  jueves_trabaja    Boolean  @default(true)
+  viernes_trabaja   Boolean  @default(true)
+  sabado_trabaja    Boolean  @default(true)
+  domingo_trabaja   Boolean  @default(false)
+}
+
+model DiaBloqueado {
+  id     Int      @id @default(autoincrement())
+  fecha  DateTime @unique
+  motivo String?
+}
