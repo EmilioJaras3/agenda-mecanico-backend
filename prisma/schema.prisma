@@ -23,3 +23,38 @@ model Usuario {
   activo         Boolean      @default(true)
   citas          Cita[]
 }
+
+enum EstadoCita {
+  pendiente
+  aceptada
+  rechazada
+  completada
+  cancelada
+}
+
+model TipoServicio {
+  id              Int     @id @default(autoincrement())
+  nombre          String
+  duracion_min    Int     @default(0)
+  duracion_dias   Int     @default(0)
+  ocupa_cupo_dia  Boolean
+  citas           Cita[]
+}
+
+model Cita {
+  id                   Int               @id @default(autoincrement())
+  cliente_id           Int
+  usuario              Usuario           @relation(fields: [cliente_id], references: [id])
+  tipo_servicio_id     Int
+  tipoServicio         TipoServicio       @relation(fields: [tipo_servicio_id], references: [id])
+  modelo_auto          String
+  descripcion_problema String
+  fecha_inicio         DateTime
+  hora_inicio          String?           // Formato "HH:mm"
+  fecha_fin            DateTime?
+  duracion_dias_real   Int?
+  estado               EstadoCita         @default(pendiente)
+  razon_rechazo        String?           @db.Text
+  fecha_solicitud      DateTime          @default(now())
+  ocupaciones          OcupacionDiaria[]
+}
