@@ -159,4 +159,45 @@ export class CitasService {
       return updated;
     });
   }
+
+  async editar(id: number, data: { fecha_preferida?: string; estado?: string; descripcion?: string }) {
+    const cita = await this.prisma.cita.findUnique({ where: { id } });
+    if (!cita) throw new NotFoundException("Cita no encontrada");
+
+    const updateData: any = {};
+    if (data.fecha_preferida) updateData.fecha_inicio = new Date(data.fecha_preferida);
+    if (data.descripcion) updateData.descripcion_problema = data.descripcion;
+    if (data.estado) {
+      const estadosValidos = ["pendiente", "aceptada", "en_curso", "completada", "cancelada"];
+      if (!estadosValidos.includes(data.estado)) {
+        throw new BadRequestException(`Estado invalido. Validos: ${estadosValidos.join(", ")}`);
+      }
+      updateData.estado = data.estado;
+    }
+
+    return this.prisma.cita.update({ where: { id }, data: updateData });
+  }
+
+  async cambiarEstado(id: number, nuevoEstado: string) {
+    const cita = await this.prisma.cita.findUnique({ where: { id } });
+    if (!cita) throw new NotFoundException("Cita no encontrada");
+
+    const transiciones: Record<string, string[]> = {
+      pendiente: ["aceptada", "rechazada", "cancelada"],
+      aceptada: ["en_curso", "cancelada"],
+      en_curso: ["completada", "cancelada"],
+      completada: [],
+      cancelada: [],
+      rechazada: [],
+    };
+
+    const permitidos = transiciones[cita.estado] || [];
+    if (!permitidos.includes(nuevoEstado)) {
+      throw new BadRequestException(
+        `No se puede cambiar de '${cita.estado}' a '${nuevoEstado}'. Transiciones permitidas: ${permitidos.join(", ") || "ninguna"}`,
+      );
+    }
+
+    return this.prisma.cita.update({ where: { id }, data: { estado: nuevoEstado } });
+  }
 }

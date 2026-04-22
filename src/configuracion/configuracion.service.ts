@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 @Injectable()
 export class ConfiguracionService {
@@ -13,6 +13,27 @@ export class ConfiguracionService {
         motivo: data.motivo 
       } 
     });
+  }
+
+  async getBloqueos() {
+    return this.prisma.bloqueo.findMany({ orderBy: { fecha_inicio: 'asc' } });
+  }
+
+  async deleteBloqueo(id: number) {
+    const bloqueo = await this.prisma.bloqueo.findUnique({ where: { id } });
+    if (!bloqueo) throw new NotFoundException('Bloqueo no encontrado');
+    await this.prisma.bloqueo.delete({ where: { id } });
+    return { message: 'Bloqueo eliminado correctamente', id };
+  }
+
+  async updateBloqueo(id: number, data: { fecha_inicio?: string, fecha_fin?: string, motivo?: string }) {
+    const bloqueo = await this.prisma.bloqueo.findUnique({ where: { id } });
+    if (!bloqueo) throw new NotFoundException('Bloqueo no encontrado');
+    const updateData: any = {};
+    if (data.fecha_inicio) updateData.fecha_inicio = new Date(data.fecha_inicio);
+    if (data.fecha_fin) updateData.fecha_fin = new Date(data.fecha_fin);
+    if (data.motivo) updateData.motivo = data.motivo;
+    return this.prisma.bloqueo.update({ where: { id }, data: updateData });
   }
 
   async getTiposServicio() {

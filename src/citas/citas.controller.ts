@@ -43,4 +43,27 @@ export class CitasController {
       body.razon || "El mecánico rechazó la solicitud.",
     );
   }
+
+  @Patch(":id")
+  @Roles("mecanico")
+  editar(@Param("id") id: string, @Body() body: any) {
+    return this.citasService.editar(Number(id), body);
+  }
+
+  @Patch(":id/en-curso")
+  @Roles("mecanico")
+  enCurso(@Param("id") id: string) {
+    return this.citasService.cambiarEstado(Number(id), "en_curso");
+  }
+
+  @Patch(":id/completar")
+  @Roles("mecanico")
+  completar(@Param("id") id: string) {
+    return this.citasService.cambiarEstado(Number(id), "completada");
+  }
+
+  @Patch(":id/cancelar")
+  cancelar(@Param("id") id: string) {
+    return this.citasService.cancelar(Number(id));
+  }
 }
