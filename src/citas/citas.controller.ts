@@ -29,6 +29,7 @@ export class CitasController {
     return this.citasService.create(req.user.userId, dto);
   }
 
+  // Rutas especificas PRIMERO (antes del generico :id)
   @Patch(":id/aceptar")
   @Roles("mecanico")
   aceptar(@Param("id") id: string, @Body() body: any) {
@@ -42,12 +43,6 @@ export class CitasController {
       Number(id),
       body.razon || "El mecánico rechazó la solicitud.",
     );
-  }
-
-  @Patch(":id")
-  @Roles("mecanico")
-  editar(@Param("id") id: string, @Body() body: any) {
-    return this.citasService.editar(Number(id), body);
   }
 
   @Patch(":id/en-curso")
@@ -65,5 +60,12 @@ export class CitasController {
   @Patch(":id/cancelar")
   cancelar(@Param("id") id: string) {
     return this.citasService.cancelar(Number(id));
+  }
+
+  // Ruta generica AL FINAL para no interceptar las especificas
+  @Patch(":id")
+  @Roles("mecanico")
+  editar(@Param("id") id: string, @Body() body: any) {
+    return this.citasService.editar(Number(id), body);
   }
 }
