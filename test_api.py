@@ -1,252 +1,188 @@
 """
 =============================================================
-  Apex Forge API - Script de Pruebas Automatizadas
-  El token se guarda automaticamente al hacer login/register
-  y se reutiliza en TODAS las demas peticiones.
+  APEX FORGE - TEST COMPLETO AUTOMATIZADO
+  Solo ejecuta: python test_api.py
+  NO TOCAS NADA. Todo se hace solo.
 =============================================================
-Instalar dependencia:  pip install requests
-Ejecutar:              python test_api.py
 """
+import requests, json, sys
 
-import requests
-import json
-import sys
+BASE = "https://agenda-mecanico-backend-1.onrender.com"
+OK = "✅"
+FAIL = "❌"
+TOKEN = None
 
-# ─── CONFIGURACION ────────────────────────────────────────
-BASE_URL = "https://agenda-mecanico-backend-1.onrender.com"
-TOKEN = None  # Se llena automaticamente al hacer login
+def h():
+    return {"Content-Type": "application/json", "Authorization": f"Bearer {TOKEN}"}
 
-
-# ─── HELPERS ──────────────────────────────────────────────
-def headers():
-    """Devuelve headers con el token JWT si existe."""
-    h = {"Content-Type": "application/json"}
-    if TOKEN:
-        h["Authorization"] = f"Bearer {TOKEN}"
-    return h
-
-
-def guardar_token(response):
-    """Extrae y guarda el token de la respuesta automaticamente."""
-    global TOKEN
-    data = response.json()
-    if "access_token" in data:
-        TOKEN = data["access_token"]
-        print(f"   🔑 Token guardado: {TOKEN[:20]}...")
-    return data
-
-
-def imprimir(nombre, response):
-    """Imprime el resultado de un endpoint de forma bonita."""
-    estado = "✅" if response.status_code < 400 else "❌"
+def show(name, r):
+    s = OK if r.status_code < 400 else FAIL
     print(f"\n{'='*60}")
-    print(f"{estado} [{response.status_code}] {nombre}")
+    print(f"{s} [{r.status_code}] {name}")
     print(f"{'='*60}")
     try:
-        print(json.dumps(response.json(), indent=2, ensure_ascii=False)[:500])
-    except Exception:
-        print(response.text[:500])
-
-
-# ─── 1. ENDPOINTS PUBLICOS ───────────────────────────────
-def test_health_check():
-    r = requests.get(f"{BASE_URL}/")
-    imprimir("GET / (Health Check)", r)
+        print(json.dumps(r.json(), indent=2, ensure_ascii=False)[:600])
+    except:
+        print(r.text[:300])
     return r
 
-
-def test_disponibilidad():
-    r = requests.get(f"{BASE_URL}/disponibilidad", params={
-        "fecha": "2026-05-20",
-        "tipo": 1
-    })
-    imprimir("GET /disponibilidad", r)
-    return r
-
-
-# ─── 2. AUTH ──────────────────────────────────────────────
-def test_register_mecanico():
-    r = requests.post(f"{BASE_URL}/auth/register", json={
-        "nombre": "Admin Mecanico",
-        "email": "admin@apexforge.com",
-        "contrasena": "password123",
-        "telefono": "555-0199",
-        "rol": "mecanico"
-    })
-    imprimir("POST /auth/register (Mecanico)", r)
+def login(email, passw, label):
+    global TOKEN
+    r = requests.post(f"{BASE}/auth/login", json={"email": email, "contrasena": passw})
     if r.status_code in (200, 201):
-        guardar_token(r)
+        TOKEN = r.json()["access_token"]
+        print(f"\n🔑 {label} - Token guardado: {TOKEN[:20]}...")
+    else:
+        show(f"Login {label}", r)
     return r
 
-
-def test_register_cliente():
-    r = requests.post(f"{BASE_URL}/auth/register", json={
-        "nombre": "Carlos Lopez",
-        "email": "carlos@email.com",
-        "contrasena": "password123",
-        "telefono": "555-1234",
-        "rol": "cliente"
+def register(nombre, email, passw, tel, rol):
+    r = requests.post(f"{BASE}/auth/register", json={
+        "nombre": nombre, "email": email, "contrasena": passw, "telefono": tel, "rol": rol
     })
-    imprimir("POST /auth/register (Cliente)", r)
-    if r.status_code in (200, 201):
-        guardar_token(r)
     return r
 
+# ══════════════════════════════════════════════════════════
+print("\n" + "🚀" * 20)
+print("   APEX FORGE - PRUEBA COMPLETA AUTOMATICA")
+print("🚀" * 20)
+print(f"\n📡 URL: {BASE}\n")
 
-def test_login_mecanico():
-    r = requests.post(f"{BASE_URL}/auth/login", json={
-        "email": "admin@apexforge.com",
-        "contrasena": "password123"
-    })
-    imprimir("POST /auth/login (Mecanico)", r)
-    if r.status_code in (200, 201):
-        guardar_token(r)
-    return r
+# ── 1. HEALTH CHECK ──────────────────────────────────────
+print("\n" + "─"*60)
+print("   🌐 HEALTH CHECK")
+print("─"*60)
+show("GET /", requests.get(f"{BASE}/"))
 
+# ── 2. REGISTRAR USUARIOS (si no existen) ────────────────
+print("\n" + "─"*60)
+print("   📝 REGISTRO DE USUARIOS")
+print("─"*60)
+r = register("Mecanico Admin", "mecanico_test@apex.com", "test123456", "555-0001", "mecanico")
+show("Register Mecanico", r)
+r = register("Cliente Test", "cliente_test@apex.com", "test123456", "555-0002", "cliente")
+show("Register Cliente", r)
 
-def test_login_cliente():
-    r = requests.post(f"{BASE_URL}/auth/login", json={
-        "email": "carlos@email.com",
-        "contrasena": "password123"
-    })
-    imprimir("POST /auth/login (Cliente)", r)
-    if r.status_code in (200, 201):
-        guardar_token(r)
-    return r
+# ── 3. LOGIN MECANICO → SEED ─────────────────────────────
+print("\n" + "─"*60)
+print("   🔧 LOGIN MECANICO + SEED")
+print("─"*60)
+login("mecanico_test@apex.com", "test123456", "MECANICO")
+show("POST /configuracion/seed", requests.post(f"{BASE}/configuracion/seed", headers=h()))
 
+# ── 4. VER TIPOS DE SERVICIO ─────────────────────────────
+print("\n" + "─"*60)
+print("   📋 TIPOS DE SERVICIO")
+print("─"*60)
+show("GET /configuracion/tipos-servicio", requests.get(f"{BASE}/configuracion/tipos-servicio", headers=h()))
 
-# ─── 3. CITAS ─────────────────────────────────────────────
-def test_ver_citas():
-    r = requests.get(f"{BASE_URL}/citas", headers=headers())
-    imprimir("GET /citas", r)
-    return r
+# ── 5. VER CONFIGURACION ─────────────────────────────────
+print("\n" + "─"*60)
+print("   ⚙️  CONFIGURACION DEL TALLER")
+print("─"*60)
+show("GET /configuracion", requests.get(f"{BASE}/configuracion", headers=h()))
 
+# ── 6. ACTUALIZAR CONFIGURACION ──────────────────────────
+show("PATCH /configuracion", requests.patch(f"{BASE}/configuracion", headers=h(), json={
+    "capacidad_diaria": 8, "hora_apertura": "09:00", "hora_cierre": "19:00"
+}))
 
-def test_crear_cita():
-    r = requests.post(f"{BASE_URL}/citas", headers=headers(), json={
-        "servicio": 1,
-        "vehiculo_modelo": "Porsche Taycan",
-        "descripcion": "Revision de frenos regenerativos",
-        "fecha_preferida": "2026-05-20"
-    })
-    imprimir("POST /citas (Crear Cita)", r)
-    return r
+# ── 7. BLOQUEAR FECHAS ───────────────────────────────────
+print("\n" + "─"*60)
+print("   🚫 BLOQUEAR FECHAS")
+print("─"*60)
+show("POST /configuracion/bloquear", requests.post(f"{BASE}/configuracion/bloquear", headers=h(), json={
+    "fecha_inicio": "2026-12-24", "fecha_fin": "2026-12-31", "motivo": "Vacaciones Navidad"
+}))
 
+# ── 8. LOGIN CLIENTE → CREAR CITA ────────────────────────
+print("\n" + "─"*60)
+print("   🚗 LOGIN CLIENTE + CREAR CITA")
+print("─"*60)
+login("cliente_test@apex.com", "test123456", "CLIENTE")
 
-def test_aceptar_cita(cita_id=1):
-    r = requests.patch(f"{BASE_URL}/citas/{cita_id}/aceptar", headers=headers(), json={
-        "duracionReal": 2
-    })
-    imprimir(f"PATCH /citas/{cita_id}/aceptar", r)
-    return r
+r_cita = requests.post(f"{BASE}/citas", headers=h(), json={
+    "servicio": 1, "vehiculo_modelo": "Honda Civic 2024",
+    "descripcion": "Cambio de aceite y filtro", "fecha_preferida": "2026-06-15"
+})
+show("POST /citas (Crear Cita)", r_cita)
 
+# Guardar el ID de la cita creada
+cita_id = None
+if r_cita.status_code in (200, 201):
+    cita_id = r_cita.json().get("id")
+    print(f"\n   📌 Cita creada con ID: {cita_id}")
 
-def test_rechazar_cita(cita_id=1):
-    r = requests.patch(f"{BASE_URL}/citas/{cita_id}/rechazar", headers=headers(), json={
-        "razon": "No hay piezas disponibles en este momento"
-    })
-    imprimir(f"PATCH /citas/{cita_id}/rechazar", r)
-    return r
+# ── 9. VER MIS CITAS (como cliente) ──────────────────────
+print("\n" + "─"*60)
+print("   👀 VER MIS CITAS (Cliente)")
+print("─"*60)
+show("GET /citas (solo mis citas)", requests.get(f"{BASE}/citas", headers=h()))
 
+# ── 10. LOGIN MECANICO → VER TODAS → ACEPTAR ─────────────
+print("\n" + "─"*60)
+print("   🔧 LOGIN MECANICO + GESTIONAR CITAS")
+print("─"*60)
+login("mecanico_test@apex.com", "test123456", "MECANICO")
 
-# ─── 4. CONFIGURACION ────────────────────────────────────
-def test_ver_configuracion():
-    r = requests.get(f"{BASE_URL}/configuracion", headers=headers())
-    imprimir("GET /configuracion", r)
-    return r
+show("GET /citas (TODAS)", requests.get(f"{BASE}/citas", headers=h()))
 
+if cita_id:
+    show(f"PATCH /citas/{cita_id}/aceptar", requests.patch(
+        f"{BASE}/citas/{cita_id}/aceptar", headers=h(), json={"duracionReal": 2}
+    ))
 
-def test_actualizar_configuracion():
-    r = requests.patch(f"{BASE_URL}/configuracion", headers=headers(), json={
-        "capacidad_diaria": 8,
-        "hora_apertura": "09:00",
-        "hora_cierre": "19:00",
-        "sabado_trabaja": False
-    })
-    imprimir("PATCH /configuracion", r)
-    return r
+# ── 11. CREAR OTRA CITA Y RECHAZARLA ─────────────────────
+print("\n" + "─"*60)
+print("   ❌ CREAR CITA + RECHAZAR")
+print("─"*60)
+login("cliente_test@apex.com", "test123456", "CLIENTE")
 
+r_cita2 = requests.post(f"{BASE}/citas", headers=h(), json={
+    "servicio": 3, "vehiculo_modelo": "Toyota Corolla 2022",
+    "descripcion": "Ruido en los frenos traseros", "fecha_preferida": "2026-07-01"
+})
+show("POST /citas (Cita para rechazar)", r_cita2)
 
-def test_bloquear_fechas():
-    r = requests.post(f"{BASE_URL}/configuracion/bloquear", headers=headers(), json={
-        "fecha_inicio": "2026-12-24",
-        "fecha_fin": "2026-12-31",
-        "motivo": "Vacaciones de Navidad"
-    })
-    imprimir("POST /configuracion/bloquear", r)
-    return r
+cita_id2 = None
+if r_cita2.status_code in (200, 201):
+    cita_id2 = r_cita2.json().get("id")
 
+login("mecanico_test@apex.com", "test123456", "MECANICO")
 
-# ─── FLUJO COMPLETO ──────────────────────────────────────
-def run_all():
-    print("\n" + "🚀" * 25)
-    print("   APEX FORGE API - PRUEBAS COMPLETAS")
-    print("🚀" * 25)
-    print(f"\n📡 Apuntando a: {BASE_URL}\n")
+if cita_id2:
+    show(f"PATCH /citas/{cita_id2}/rechazar", requests.patch(
+        f"{BASE}/citas/{cita_id2}/rechazar", headers=h(),
+        json={"razon": "No hay piezas disponibles en este momento"}
+    ))
 
-    # --- Publicos ---
-    print("\n\n" + "─" * 60)
-    print("   🌐 ENDPOINTS PUBLICOS")
-    print("─" * 60)
-    test_health_check()
+# ── 12. DISPONIBILIDAD ───────────────────────────────────
+print("\n" + "─"*60)
+print("   📅 DISPONIBILIDAD")
+print("─"*60)
+show("GET /disponibilidad", requests.get(f"{BASE}/disponibilidad", params={"fecha": "2026-06-15", "tipo": 1}))
 
-    # --- Auth: Registrar usuarios ---
-    print("\n\n" + "─" * 60)
-    print("   🔑 AUTH - REGISTRO")
-    print("─" * 60)
-    test_register_mecanico()
-    test_register_cliente()
-
-    # --- Login como mecanico para probar todo ---
-    print("\n\n" + "─" * 60)
-    print("   🔑 AUTH - LOGIN MECANICO (token se guarda solo)")
-    print("─" * 60)
-    test_login_mecanico()
-
-    # --- Configuracion (necesita ser mecanico) ---
-    print("\n\n" + "─" * 60)
-    print("   🔧 CONFIGURACION (como Mecanico)")
-    print("─" * 60)
-    test_ver_configuracion()
-    test_actualizar_configuracion()
-    test_bloquear_fechas()
-
-    # --- Login como cliente para crear cita ---
-    print("\n\n" + "─" * 60)
-    print("   🔑 AUTH - LOGIN CLIENTE (token se cambia solo)")
-    print("─" * 60)
-    test_login_cliente()
-
-    # --- Citas como cliente ---
-    print("\n\n" + "─" * 60)
-    print("   🚗 CITAS (como Cliente)")
-    print("─" * 60)
-    test_ver_citas()
-    test_crear_cita()
-
-    # --- Login como mecanico para aprobar ---
-    print("\n\n" + "─" * 60)
-    print("   🔑 AUTH - LOGIN MECANICO (para aprobar/rechazar)")
-    print("─" * 60)
-    test_login_mecanico()
-
-    # --- Aprobar/Rechazar ---
-    print("\n\n" + "─" * 60)
-    print("   🔧 GESTION DE CITAS (como Mecanico)")
-    print("─" * 60)
-    test_ver_citas()
-    test_aceptar_cita(1)
-
-    # --- Disponibilidad ---
-    print("\n\n" + "─" * 60)
-    print("   🌐 DISPONIBILIDAD")
-    print("─" * 60)
-    test_disponibilidad()
-
-    print("\n\n" + "🏁" * 25)
-    print("   PRUEBAS FINALIZADAS")
-    print("🏁" * 25 + "\n")
-
-
-if __name__ == "__main__":
-    run_all()
+# ── RESUMEN ───────────────────────────────────────────────
+print("\n\n" + "🏁" * 20)
+print("   TODAS LAS PRUEBAS FINALIZADAS")
+print("🏁" * 20)
+print(f"""
+📊 Endpoints probados:
+   1.  GET  /                          (Health Check)
+   2.  POST /auth/register             (Mecanico)
+   3.  POST /auth/register             (Cliente)
+   4.  POST /auth/login                (Mecanico)
+   5.  POST /auth/login                (Cliente)
+   6.  POST /configuracion/seed        (Poblar DB)
+   7.  GET  /configuracion/tipos-servicio
+   8.  GET  /configuracion             (Ver config)
+   9.  PATCH /configuracion            (Actualizar)
+   10. POST /configuracion/bloquear    (Bloquear fechas)
+   11. POST /citas                     (Crear cita)
+   12. GET  /citas                     (Ver citas cliente)
+   13. GET  /citas                     (Ver todas mecanico)
+   14. PATCH /citas/:id/aceptar        (Aprobar)
+   15. POST /citas                     (Otra cita)
+   16. PATCH /citas/:id/rechazar       (Rechazar)
+   17. GET  /disponibilidad            (Consultar)
+""")

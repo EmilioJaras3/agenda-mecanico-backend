@@ -1,6 +1,6 @@
 FROM node:20-alpine
 
-# Instrucción agregada para instalar la librería necesaria para Prisma
+# InstrucciÃ³n agregada para instalar la librerÃ­a necesaria para Prisma
 RUN apk add --no-cache openssl
 
 WORKDIR /app
@@ -15,4 +15,4 @@ RUN npm run build
 
 EXPOSE 10000
 
-CMD ["npm", "run", "start:prod"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate && npm run start:prod"]
