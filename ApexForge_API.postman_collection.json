@@ -6,10 +6,45 @@
 	},
 	"item": [
 		{
-			"name": "Auth",
+			"name": "🌐 Publicos",
 			"item": [
 				{
-					"name": "Register",
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": ["{{base_url}}"],
+							"path": [""]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Disponibilidad",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/disponibilidad?fecha=2026-05-20&tipo=1",
+							"host": ["{{base_url}}"],
+							"path": ["disponibilidad"],
+							"query": [
+								{ "key": "fecha", "value": "2026-05-20" },
+								{ "key": "tipo", "value": "1" }
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔑 Auth",
+			"item": [
+				{
+					"name": "Register (Mecanico)",
 					"event": [
 						{
 							"listen": "test",
@@ -17,7 +52,8 @@
 								"exec": [
 									"var jsonData = pm.response.json();",
 									"if (jsonData.access_token) {",
-									"    pm.collectionVariables.set(\"jwt_token\", jsonData.access_token);",
+									"    pm.collectionVariables.set('jwt_token', jsonData.access_token);",
+									"    console.log('✅ Token guardado automaticamente desde Register');",
 									"}"
 								],
 								"type": "text/javascript"
@@ -29,28 +65,19 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"nombre\": \"Admin Mechanico\",\n    \"email\": \"admin@apexforge.com\",\n    \"contrasena\": \"password123\",\n    \"telefono\": \"555-0199\",\n    \"rol\": \"mecanico\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n    \"nombre\": \"Admin Mecanico\",\n    \"email\": \"admin@apexforge.com\",\n    \"contrasena\": \"password123\",\n    \"telefono\": \"555-0199\",\n    \"rol\": \"mecanico\"\n}",
+							"options": { "raw": { "language": "json" } }
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/register",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"register"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register"]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Login",
+					"name": "Register (Cliente)",
 					"event": [
 						{
 							"listen": "test",
@@ -58,7 +85,41 @@
 								"exec": [
 									"var jsonData = pm.response.json();",
 									"if (jsonData.access_token) {",
-									"    pm.collectionVariables.set(\"jwt_token\", jsonData.access_token);",
+									"    pm.collectionVariables.set('jwt_token', jsonData.access_token);",
+									"    console.log('✅ Token guardado automaticamente desde Register Cliente');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nombre\": \"Carlos Lopez\",\n    \"email\": \"carlos@email.com\",\n    \"contrasena\": \"password123\",\n    \"telefono\": \"555-1234\",\n    \"rol\": \"cliente\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Mecanico)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access_token) {",
+									"    pm.collectionVariables.set('jwt_token', jsonData.access_token);",
+									"    console.log('✅ Token de MECANICO guardado automaticamente');",
 									"}"
 								],
 								"type": "text/javascript"
@@ -71,21 +132,45 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"email\": \"admin@apexforge.com\",\n    \"contrasena\": \"password123\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"options": { "raw": { "language": "json" } }
 						},
 						"url": {
 							"raw": "{{base_url}}/auth/login",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"auth",
-								"login"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Cliente)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access_token) {",
+									"    pm.collectionVariables.set('jwt_token', jsonData.access_token);",
+									"    console.log('✅ Token de CLIENTE guardado automaticamente');",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"carlos@email.com\",\n    \"contrasena\": \"password123\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["auth", "login"]
 						}
 					},
 					"response": []
@@ -93,10 +178,10 @@
 			]
 		},
 		{
-			"name": "Citas",
+			"name": "🚗 Citas",
 			"item": [
 				{
-					"name": "Get All Citas",
+					"name": "Ver Todas las Citas",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -108,18 +193,14 @@
 						],
 						"url": {
 							"raw": "{{base_url}}/citas",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"citas"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["citas"]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "Create Cita",
+					"name": "Crear Cita",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -131,21 +212,13 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"cliente_id\": 1,\n    \"tipo_servicio_id\": 1,\n    \"modelo_auto\": \"Porsche Taycan\",\n    \"descripcion_problema\": \"Revisión de frenos regenerativos\",\n    \"fecha_inicio\": \"2024-05-20\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"raw": "{\n    \"servicio\": 1,\n    \"vehiculo_modelo\": \"Porsche Taycan\",\n    \"descripcion\": \"Revision de frenos regenerativos\",\n    \"fecha_preferida\": \"2026-05-20\"\n}",
+							"options": { "raw": { "language": "json" } }
 						},
 						"url": {
 							"raw": "{{base_url}}/citas",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"citas"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["citas"]
 						}
 					},
 					"response": []
@@ -164,22 +237,108 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"duracionReal\": 2\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
+							"options": { "raw": { "language": "json" } }
 						},
 						"url": {
 							"raw": "{{base_url}}/citas/1/aceptar",
-							"host": [
-								"{{base_url}}"
-							],
-							"path": [
-								"citas",
-								"1",
-								"aceptar"
-							]
+							"host": ["{{base_url}}"],
+							"path": ["citas", "1", "aceptar"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Rechazar Cita",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"razon\": \"No hay piezas disponibles en este momento\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/citas/1/rechazar",
+							"host": ["{{base_url}}"],
+							"path": ["citas", "1", "rechazar"]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "🔧 Configuracion",
+			"item": [
+				{
+					"name": "Ver Configuracion",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/configuracion",
+							"host": ["{{base_url}}"],
+							"path": ["configuracion"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Actualizar Configuracion",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"capacidad_diaria\": 8,\n    \"hora_apertura\": \"09:00\",\n    \"hora_cierre\": \"19:00\",\n    \"sabado_trabaja\": false\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/configuracion",
+							"host": ["{{base_url}}"],
+							"path": ["configuracion"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bloquear Fechas",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"fecha_inicio\": \"2026-12-24\",\n    \"fecha_fin\": \"2026-12-31\",\n    \"motivo\": \"Vacaciones de Navidad\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/configuracion/bloquear",
+							"host": ["{{base_url}}"],
+							"path": ["configuracion", "bloquear"]
 						}
 					},
 					"response": []
@@ -192,18 +351,14 @@
 			"listen": "prerequest",
 			"script": {
 				"type": "text/javascript",
-				"exec": [
-					""
-				]
+				"exec": [""]
 			}
 		},
 		{
 			"listen": "test",
 			"script": {
 				"type": "text/javascript",
-				"exec": [
-					""
-				]
+				"exec": [""]
 			}
 		}
 	],
