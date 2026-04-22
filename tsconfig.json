@@ -16,5 +16,10 @@
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false
-  }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "frontend"
+  ]
 }

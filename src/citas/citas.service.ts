@@ -201,6 +201,7 @@ export class CitasService {
       );
     }
 
-    return this.prisma.cita.update({ where: { id }, data: { estado: nuevoEstado } });
+    return this.prisma.cita.update({ where: { id }, data: { estado: nuevoEstado as any } });
   }
 }
+
