@@ -27,6 +27,24 @@ export class CitasService {
   }
 
   async create(userId: number, dto: CreateCitaDto) {
+    // Verificar que el tipo de servicio existe
+    const tipoServicio = await this.prisma.tipoServicio.findUnique({
+      where: { id: dto.servicio },
+    });
+    if (!tipoServicio) {
+      throw new BadRequestException(
+        `El tipo de servicio con id ${dto.servicio} no existe. Ejecuta POST /configuracion/seed para crear los tipos de servicio.`,
+      );
+    }
+
+    // Verificar que el usuario existe
+    const usuario = await this.prisma.usuario.findUnique({
+      where: { id: userId },
+    });
+    if (!usuario) {
+      throw new BadRequestException(`Usuario con id ${userId} no encontrado.`);
+    }
+
     const cita = await this.prisma.cita.create({
       data: {
         cliente_id: userId,
@@ -40,12 +58,12 @@ export class CitasService {
       include: { tipoServicio: true, usuario: true },
     });
 
-    // NotificaciÃ³n a Discord
+    // Notificacion a Discord
     await this.notifications.sendDiscordNotification(
       "Nueva Solicitud de Cita",
-      `ðŸ“  **Cliente:** ${cita.usuario.nombre}\nðŸš— **VehÃ­culo:** ${cita.modelo_auto}\nðŸ› ï¸  **Servicio:** ${cita.tipoServicio.nombre}\nðŸ“… **Fecha:** ${dto.fecha_preferida}`,
-      0x3498db, // Azul
-    );
+      `📝 **Cliente:** ${cita.usuario.nombre}\n🚗 **Vehiculo:** ${cita.modelo_auto}\n🛠️ **Servicio:** ${cita.tipoServicio.nombre}\n📅 **Fecha:** ${dto.fecha_preferida}`,
+      0x3498db,
+    ).catch(() => {}); // No fallar si Discord no responde
 
     return cita;
   }
