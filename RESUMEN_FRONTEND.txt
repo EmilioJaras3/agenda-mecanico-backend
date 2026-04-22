@@ -1,0 +1,12 @@
+﻿Â¡Hola! Ya terminÃ© de subir los ajustes del Backend al repositorio para que la integraciÃ³n con tu Frontend funcione correctamente. Esto es lo que quedÃ³ listo:
+
+1. CORS Habilitado: Ya no deberÃ­as tener problemas de polÃ­ticas. El puerto http://localhost:3000 estÃ¡ autorizado, permite el envÃ­o de cookies/tokens (credentials: true) y soporta los mÃ©todos (GET, PUT, PATCH, POST, DELETE).
+2. Registro e Inicio de SesiÃ³n (Auth):
+   - Para el registro (POST /auth/register), el backend espera exactamente las llaves: nombre, email, contrasena, telefono y rol. (Nota: telefono es obligatorio).
+   - Para el login (POST /auth/login), espera: email y contrasena.
+3. Endpoint de Bloqueo de Fechas (POST /configuracion/bloquear):
+   - ArreglÃ© el error 500 que te estaba saliendo. ReestructurÃ© la base de datos y ahora el endpoint espera exactamente el formato que me pediste: un JSON con { "fecha_inicio", "fecha_fin", "motivo" } (las fechas como strings YYYY-MM-DD). 
+   - AutomÃ¡ticamente te devolverÃ¡ un cÃ³digo 201 Created al enviarlo.
+4. Despliegue a Render: El cÃ³digo estÃ¡ apuntando correctamente a la variable del sistema para los puertos, por lo que una vez que finalice el despliegue automÃ¡tico en la nube, todo seguirÃ¡ funcionando idÃ©ntico que en local.
+
+Haz un git pull de tu lado si tienes conexiÃ³n directa, Â¡y avÃ­same si choca algÃºn endpoint o si todo te da verde!

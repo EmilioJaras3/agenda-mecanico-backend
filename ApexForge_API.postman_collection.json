@@ -210,7 +210,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:10000",
+			"value": "https://agenda-mecanico-backend-1.onrender.com",
 			"type": "string"
 		},
 		{
