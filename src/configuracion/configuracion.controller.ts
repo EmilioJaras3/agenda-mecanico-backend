@@ -12,4 +12,12 @@ export class ConfiguracionController {
   @Post('bloquear') @Roles('mecanico') block(@Body() data: { fecha_inicio: string, fecha_fin: string, motivo: string }) {
     return this.configService.blockDate(data);
   }
+
+  @Post('seed') @Roles('mecanico') seed() {
+    return this.configService.seed();
+  }
+
+  @Get('tipos-servicio') getTiposServicio() {
+    return this.configService.getTiposServicio();
+  }
 }

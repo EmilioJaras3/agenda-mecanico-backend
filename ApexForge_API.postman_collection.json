@@ -342,6 +342,44 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "⚡ Seed Base de Datos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/configuracion/seed",
+							"host": ["{{base_url}}"],
+							"path": ["configuracion", "seed"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Ver Tipos de Servicio",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/configuracion/tipos-servicio",
+							"host": ["{{base_url}}"],
+							"path": ["configuracion", "tipos-servicio"]
+						}
+					},
+					"response": []
 				}
 			]
 		}

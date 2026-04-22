@@ -14,4 +14,33 @@ export class ConfiguracionService {
       } 
     });
   }
+
+  async getTiposServicio() {
+    return this.prisma.tipoServicio.findMany();
+  }
+
+  async seed() {
+    const servicios = [
+      { nombre: 'Cambio de Aceite', duracion_min: 60, duracion_dias: 0, ocupa_cupo_dia: false },
+      { nombre: 'Afinación Mayor', duracion_min: 0, duracion_dias: 1, ocupa_cupo_dia: true },
+      { nombre: 'Frenos (Pastillas y Discos)', duracion_min: 0, duracion_dias: 1, ocupa_cupo_dia: true },
+      { nombre: 'Suspensión', duracion_min: 0, duracion_dias: 2, ocupa_cupo_dia: true },
+      { nombre: 'Diagnóstico General', duracion_min: 45, duracion_dias: 0, ocupa_cupo_dia: false },
+      { nombre: 'Transmisión', duracion_min: 0, duracion_dias: 3, ocupa_cupo_dia: true },
+      { nombre: 'Sistema Eléctrico', duracion_min: 0, duracion_dias: 1, ocupa_cupo_dia: true },
+      { nombre: 'Hojalatería y Pintura', duracion_min: 0, duracion_dias: 5, ocupa_cupo_dia: true },
+    ];
+
+    for (const s of servicios) {
+      await this.prisma.tipoServicio.create({ data: s }).catch(() => {});
+    }
+
+    await this.prisma.configuracionTaller.upsert({
+      where: { id: 1 },
+      update: {},
+      create: { capacidad_diaria: 5, hora_apertura: '08:00', hora_cierre: '18:00' },
+    });
+
+    return { message: 'Seed ejecutado correctamente', servicios: await this.prisma.tipoServicio.findMany() };
+  }
 }
