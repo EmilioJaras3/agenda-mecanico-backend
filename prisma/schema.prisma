@@ -27,6 +27,7 @@ model Usuario {
 enum EstadoCita {
   pendiente
   aceptada
+  en_curso
   rechazada
   completada
   cancelada
