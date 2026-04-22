@@ -156,6 +156,13 @@ export class CitasService {
         data: { estado: "cancelada" },
       });
 
+      // Notificacion Discord
+      await this.notifications.sendDiscordNotification(
+        "🚫 Cita Cancelada",
+        `La cita #${id} (${cita.modelo_auto}) ha sido cancelada.`,
+        0xff0000 
+      ).catch(() => {});
+
       return updated;
     });
   }
@@ -201,7 +208,19 @@ export class CitasService {
       );
     }
 
-    return this.prisma.cita.update({ where: { id }, data: { estado: nuevoEstado as any } });
+    const updated = await this.prisma.cita.update({ where: { id }, data: { estado: nuevoEstado as any } });
+
+    // Notificacion a Discord de cambio de estado
+    const color = nuevoEstado === "completada" ? 0x00ff00 : (nuevoEstado === "en_curso" ? 0xffff00 : 0x0099ff);
+    const emoji = nuevoEstado === "completada" ? "✅" : (nuevoEstado === "en_curso" ? "🔧" : "🔄");
+    
+    await this.notifications.sendDiscordNotification(
+      `${emoji} Estado de Cita Actualizado`,
+      `La cita #${id} de ${cita.modelo_auto} cambió a: **${nuevoEstado.toUpperCase()}**`,
+      color
+    ).catch(() => {});
+
+    return updated;
   }
 }
 
