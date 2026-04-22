@@ -160,13 +160,16 @@ export class CitasService {
     });
   }
 
-  async editar(id: number, data: { fecha_preferida?: string; estado?: string; descripcion?: string }) {
+  async editar(id: number, data: any) {
     const cita = await this.prisma.cita.findUnique({ where: { id } });
     if (!cita) throw new NotFoundException("Cita no encontrada");
 
     const updateData: any = {};
     if (data.fecha_preferida) updateData.fecha_inicio = new Date(data.fecha_preferida);
+    if (data.fecha_inicio) updateData.fecha_inicio = new Date(data.fecha_inicio);
+    if (data.fecha_fin) updateData.fecha_fin = new Date(data.fecha_fin);
     if (data.descripcion) updateData.descripcion_problema = data.descripcion;
+    if (data.descripcion_problema) updateData.descripcion_problema = data.descripcion_problema;
     if (data.estado) {
       const estadosValidos = ["pendiente", "aceptada", "en_curso", "completada", "cancelada"];
       if (!estadosValidos.includes(data.estado)) {
