@@ -85,8 +85,9 @@ model ConfiguracionTaller {
   domingo_trabaja   Boolean  @default(false)
 }
 
-model DiaBloqueado {
-  id     Int      @id @default(autoincrement())
-  fecha  DateTime @unique
-  motivo String?
+model Bloqueo {
+  id           Int      @id @default(autoincrement())
+  fecha_inicio DateTime
+  fecha_fin    DateTime
+  motivo       String?
 }
